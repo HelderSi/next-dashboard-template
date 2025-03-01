@@ -1,101 +1,178 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useState } from "react";
+import { Home, Users, Settings, ChevronsUpDown, MoreVertical } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { useAuthStore } from "@/store/authStore";
+
+interface User {
+  id: number;
+  name: string;
+  role: string;
+}
+
+const navItems = [
+  { name: "Home", icon: Home },
+  { name: "Users", icon: Users },
+  { name: "Settings", icon: Settings },
+];
+
+const initialUsers: User[] = [
+  { id: 1, name: "Alice Johnson", role: "Coordinator" },
+  { id: 2, name: "Bob Smith", role: "Helper" },
+  { id: 3, name: "Charlie Brown", role: "Organizer" },
+];
+
+const allColumns = ["name", "role"];
+
+export default function Dashboard() {
+  const [active, setActive] = useState<string>("Home");
+  const [search, setSearch] = useState<string>("");
+  const [selected, setSelected] = useState<Set<number>>(new Set());
+  const [users, setUsers] = useState<User[]>(initialUsers);
+  const [sortColumn, setSortColumn] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [visibleColumns, setVisibleColumns] = useState<string[]>(allColumns);
+  const rowsPerPage = 5;
+
+  const { logoutUser } = useAuthStore();
+
+  const handleSignOut = async () => {
+    await logoutUser();
+  };
+
+
+  const toggleSelect = (id: number) => {
+    const newSelected = new Set(selected);
+    newSelected.has(id) ? newSelected.delete(id) : newSelected.add(id);
+    setSelected(newSelected);
+  };
+
+  const toggleSelectAll = () => {
+    setSelected(selected.size === users.length ? new Set() : new Set(users.map(v => v.id)));
+  };
+
+  const handleSort = (column: keyof User) => {
+    const newDirection: "asc" | "desc" = sortColumn === column && sortDirection === "asc" ? "desc" : "asc";
+    setSortColumn(column);
+    setSortDirection(newDirection);
+    setUsers([...users].sort((a, b) => {
+      if (a[column] < b[column]) return newDirection === "asc" ? -1 : 1;
+      if (a[column] > b[column]) return newDirection === "asc" ? 1 : -1;
+      return 0;
+    }));
+  };
+
+  const filteredUsers = users.filter(v =>
+    v.name.toLowerCase().includes(search.toLowerCase()) ||
+    v.role.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const paginatedUsers = filteredUsers.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+  const totalPages = Math.ceil(filteredUsers.length / rowsPerPage);
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <div className="flex min-h-screen bg-gray-100">
+      <aside className="w-64 bg-white shadow-md p-5">
+        <h1 className="text-xl font-bold mb-6">Dashboard</h1>
+        <nav>
+          {navItems.map((item) => (
+            <Button
+              key={item.name}
+              variant={active === item.name ? "default" : "ghost"}
+              className="w-full justify-start mb-2"
+              onClick={() => setActive(item.name)}
+            >
+              <item.icon className="w-5 h-5 mr-2" /> {item.name}
+            </Button>
+          ))}
+        </nav>
+        <Button onClick={handleSignOut}>Sign Out</Button>
+      </aside>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+      <main className="flex-1 p-6">
+        <div className="bg-white shadow-md rounded-lg p-6">
+          <h2 className="text-2xl font-semibold">{active}</h2>
+          {active === "Users" ? (
+            <div>
+              <div className="flex justify-between mb-4">
+                <Input
+                  placeholder="Search..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-1/3"
+                />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline">Select Columns</Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    {allColumns.map((col) => (
+                      <DropdownMenuItem key={col} onClick={() => {
+                        setVisibleColumns(prev => prev.includes(col) ? prev.filter(c => c !== col) : [...prev, col]);
+                      }}>
+                        <Checkbox checked={visibleColumns.includes(col)} /> {col}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+              <p className="text-gray-600 mb-2">Total Rows: {filteredUsers.length}</p>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>
+                      <Checkbox
+                        checked={selected.size === users.length}
+                        onCheckedChange={toggleSelectAll}
+                      />
+                    </TableHead>
+                    {visibleColumns.includes("name") && (
+                      <TableHead onClick={() => handleSort("name")} className="cursor-pointer">Name <ChevronsUpDown className="w-4 h-4 inline" /></TableHead>
+                    )}
+                    {visibleColumns.includes("role") && (
+                      <TableHead onClick={() => handleSort("role")} className="cursor-pointer">Role <ChevronsUpDown className="w-4 h-4 inline" /></TableHead>
+                    )}
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {paginatedUsers.map((user) => (
+                    <TableRow key={user.id}>
+                      <TableCell>
+                        <Checkbox
+                          checked={selected.has(user.id)}
+                          onCheckedChange={() => toggleSelect(user.id)}
+                        />
+                      </TableCell>
+                      {visibleColumns.includes("name") && <TableCell>{user.name}</TableCell>}
+                      {visibleColumns.includes("role") && <TableCell>{user.role}</TableCell>}
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost"><MoreVertical className="w-4 h-4" /></Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent>
+                            <DropdownMenuItem>Edit</DropdownMenuItem>
+                            <DropdownMenuItem>Delete</DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          ) : (
+            <p className="text-gray-600 mt-2">Welcome to the {active} page.</p>
+          )}
         </div>
       </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
     </div>
   );
 }
