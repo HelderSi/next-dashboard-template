@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { useAuthStore } from "@/store/authStore";
+import Sidebar from "@/components/sidebar";
 
 interface User {
   id: number;
@@ -78,22 +79,11 @@ export default function Dashboard() {
 
   return (
     <div className="flex min-h-screen bg-gray-100">
-      <aside className="w-64 bg-white shadow-md p-5">
-        <h1 className="text-xl font-bold mb-6">Dashboard</h1>
-        <nav>
-          {navItems.map((item) => (
-            <Button
-              key={item.name}
-              variant={active === item.name ? "default" : "ghost"}
-              className="w-full justify-start mb-2"
-              onClick={() => setActive(item.name)}
-            >
-              <item.icon className="w-5 h-5 mr-2" /> {item.name}
-            </Button>
-          ))}
-        </nav>
-        <Button onClick={handleSignOut}>Sign Out</Button>
-      </aside>
+      <Sidebar
+        navItems={navItems}
+        handleSignOut={handleSignOut}
+        onActiveChange={(name) => setActive(name)}
+      />
 
       <main className="flex-1 p-6">
         <div className="bg-white shadow-md rounded-lg p-6">

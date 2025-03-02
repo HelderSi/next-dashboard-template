@@ -7,6 +7,7 @@ import { useAuthStore } from "@/store/authStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader } from "lucide-react";
+import Link from "next/link";
 
 export default function LoginPage() {
     const { loading, error, setError, loginUser, loginUserWithGoogle, sendPasswordResetLink } = useAuthStore();
@@ -62,16 +63,26 @@ export default function LoginPage() {
                         {loading ? <Loader className="w-4 h-4 animate-spin" /> : "Login"}
                     </Button>
                 </form>
+
+                <div className="relative mt-4">
+                    <div className="absolute inset-0 flex items-center ">
+                        <span className="w-full border-t" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-background px-2 text-muted-foreground">
+                            OR
+                        </span>
+                    </div>
+                </div>
                 <div className="flex items-center justify-center mt-4 space-x-2">
-                    <span>or</span>
                     <Button onClick={handleGoogleLogin} variant="outline" disabled={loading}>
                         {loading ? <Loader className="w-4 h-4 animate-spin" /> : "Sign in with Google"}
                     </Button>
                 </div>
                 <div className="mt-4 text-center">
-                    <button onClick={handlePasswordReset} className="text-sm text-blue-500 hover:underline">
+                    <Link href="/reset-password" className="text-sm text-blue-500 hover:underline">
                         Forgot Password?
-                    </button>
+                    </Link>
                 </div>
             </div>
         </div>

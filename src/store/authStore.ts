@@ -13,7 +13,7 @@ interface AuthState {
     loginUser: (email: string, password: string) => Promise<void>;
     loginUserWithGoogle: () => Promise<void>;
     logoutUser: () => Promise<void>;
-    sendPasswordResetLink: (email: string) => void;
+    sendPasswordResetLink: (email: string) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
