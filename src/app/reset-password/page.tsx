@@ -1,23 +1,36 @@
 "use client";
 
+import { z } from 'zod';
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { zodResolver } from '@hookform/resolvers/zod';
+import toast from "react-hot-toast";
+
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
-import toast from "react-hot-toast";
+import { InputWithError } from '@/components/ui/input-with-error';
+
+const loginSchema = z.object({
+    email: z.string().email("Please enter a valid email address")
+});
+
+type LoginFormData = z.infer<typeof loginSchema>;
 
 const ResetPasswordPage = () => {
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
 
-    const { register, handleSubmit } = useForm<{ email: string }>();
+
+    const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>({
+        resolver: zodResolver(loginSchema),
+    });
 
     const { sendPasswordResetLink } = useAuthStore();
 
-    const onSubmit = async (data: { email: string }) => {
+    const onSubmit = async (data: LoginFormData) => {
         const promise = sendPasswordResetLink(data.email);
         toast.promise(promise, {
             loading: 'Sending password reset link',
@@ -34,11 +47,13 @@ const ResetPasswordPage = () => {
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                        <Input
+                        <InputWithError
                             type="email"
                             placeholder="Enter your email"
                             {...register("email", { required: true })}
                             className="w-full"
+                            required
+                            error={errors.email?.message}
                         />
                         <Button type="submit" className="w-full" disabled={loading}>
                             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Send Reset Link"}

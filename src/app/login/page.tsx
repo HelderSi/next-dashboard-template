@@ -1,34 +1,40 @@
 // app/login/page.tsx
 "use client";
 
-import { useState } from "react";
-import toast from 'react-hot-toast';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+
 import { useAuthStore } from "@/store/authStore";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Loader } from "lucide-react";
 import Link from "next/link";
+import { useForm } from "react-hook-form";
+import { InputWithError } from "@/components/ui/input-with-error";
+
+const loginSchema = z.object({
+    email: z.string().email("Please enter a valid email address"),
+    password: z.string().min(6, "Password must be at least 6 characters")
+});
+
+type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
-    const { loading, error, setError, loginUser, loginUserWithGoogle, sendPasswordResetLink } = useAuthStore();
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
+    const { loading, error, loginUser, loginUserWithGoogle } = useAuthStore();
 
-    const handleEmailLogin = async (e: React.FormEvent) => {
-        e.preventDefault();
-        await loginUser(email, password);
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+    } = useForm<LoginFormData>({
+        resolver: zodResolver(loginSchema),
+    });
+
+    const handleEmailLogin = async (data: LoginFormData) => {
+        await loginUser(data.email, data.password);
     };
 
     const handleGoogleLogin = async () => {
         await loginUserWithGoogle();
-    };
-
-    const handlePasswordReset = async () => {
-        if (!email) {
-            toast.error("Please enter your email for password reset.");
-            return;
-        }
-        await sendPasswordResetLink(email);
     };
 
     return (
@@ -36,27 +42,28 @@ export default function LoginPage() {
             <div className="w-full max-w-md p-6 bg-white dark:bg-gray-800 rounded shadow">
                 <h1 className="mb-4 text-2xl font-bold text-center">Login</h1>
                 {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
-                <form onSubmit={handleEmailLogin}>
+                <form onSubmit={handleSubmit(handleEmailLogin)}>
                     <div className="mb-4">
                         <label className="block mb-1">Email</label>
-                        <Input
+
+                        <InputWithError
                             type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
                             className="w-full"
                             placeholder="you@example.com"
                             required
+                            {...register('email')}
+                            error={errors.email?.message}
                         />
                     </div>
                     <div className="mb-4">
                         <label className="block mb-1">Password</label>
-                        <Input
+                        <InputWithError
                             type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
                             className="w-full"
                             placeholder="********"
                             required
+                            {...register('password')}
+                            error={errors.password?.message}
                         />
                     </div>
                     <Button type="submit" className="w-full" disabled={loading}>
