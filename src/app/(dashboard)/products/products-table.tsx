@@ -16,13 +16,14 @@ import {
     CardTitle
 } from '@/components/ui/card';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, ChevronRight, ChevronsUpDown, Search } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronsUpDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Product } from './product';
 import { ProductModel } from '@/models/Product';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useState } from 'react';
 import { SearchInput } from '../search';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 
 export function ProductsTable({
     products,
@@ -33,7 +34,7 @@ export function ProductsTable({
     readonly products: ProductModel[];
     readonly offset: number;
     readonly totalProducts: number;
-    readonly showTitleDescription?: boolean
+    readonly showTitleDescription?: boolean;
 }) {
     const [selected, setSelected] = useState<Set<string>>(new Set());
     let router = useRouter();
@@ -58,27 +59,40 @@ export function ProductsTable({
     };
 
     const handleSort = (column: keyof ProductModel) => {
-        // const newDirection: "asc" | "desc" = sortColumn === column && sortDirection === "asc" ? "desc" : "asc";
-        // setSortColumn(column);
-        // setSortDirection(newDirection);
-        // setUsers([...users].sort((a, b) => {
-        //     if (a[column] < b[column]) return newDirection === "asc" ? -1 : 1;
-        //     if (a[column] > b[column]) return newDirection === "asc" ? 1 : -1;
-        //     return 0;
-        // }));
+        // Sorting logic placeholder
+    };
+
+    const handleBulkAction = (action: string) => {
+        console.log(`Performing ${action} on:`, Array.from(selected));
+        // Implement batch processing logic (e.g., delete, update, export)
     };
 
     return (
         <Card>
-            <CardHeader>
-                {showTitleDescription && <>
-                    <CardTitle>Products</CardTitle>
-                    <CardDescription>
-                        Manage your products and view their sales performance.
-                    </CardDescription>
-                </>
-                }
-                <SearchInput path='products' position='mr-auto' />
+            <CardHeader className="flex justify-between">
+                {showTitleDescription && (
+                    <div>
+                        <CardTitle>Products</CardTitle>
+                        <CardDescription>
+                            Manage your products and view their sales performance.
+                        </CardDescription>
+                    </div>
+                )}
+                <div className="flex gap-2">
+                    <SearchInput path='products' position='mr-auto' />
+                    {!!selected.size &&
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button disabled={selected.size === 0}>
+                                    Bulk Actions ({selected.size})
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuItem onSelect={() => handleBulkAction('delete')}>Delete</DropdownMenuItem>
+                                <DropdownMenuItem onSelect={() => handleBulkAction('mark_active')}>Mark as Active</DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>}
+                </div>
             </CardHeader>
             <CardContent>
                 <Table>
@@ -93,13 +107,19 @@ export function ProductsTable({
                             <TableHead className="hidden w-[100px] sm:table-cell">
                                 <span className="sr-only">Image</span>
                             </TableHead>
-                            <TableHead onClick={() => handleSort("name")} className="cursor-pointer">Name <ChevronsUpDown className="w-4 h-4 inline" /></TableHead>
-                            <TableHead onClick={() => handleSort("status")} className="cursor-pointer">Status <ChevronsUpDown className="w-4 h-4 inline" /></TableHead>
-                            <TableHead onClick={() => handleSort("price")} className="cursor-pointer">Price <ChevronsUpDown className="w-4 h-4 inline" /></TableHead>
-                            <TableHead className="hidden md:table-cell">
-                                Total Sales
+                            <TableHead onClick={() => handleSort("name")} className="cursor-pointer">
+                                Name <ChevronsUpDown className="w-4 h-4 inline" />
                             </TableHead>
-                            <TableHead onClick={() => handleSort("availableAt")} className="cursor-pointer">Created at <ChevronsUpDown className="w-4 h-4 inline" /></TableHead>
+                            <TableHead onClick={() => handleSort("status")} className="cursor-pointer">
+                                Status <ChevronsUpDown className="w-4 h-4 inline" />
+                            </TableHead>
+                            <TableHead onClick={() => handleSort("price")} className="cursor-pointer">
+                                Price <ChevronsUpDown className="w-4 h-4 inline" />
+                            </TableHead>
+                            <TableHead className="hidden md:table-cell">Total Sales</TableHead>
+                            <TableHead onClick={() => handleSort("availableAt")} className="cursor-pointer">
+                                Created at <ChevronsUpDown className="w-4 h-4 inline" />
+                            </TableHead>
                             <TableHead>
                                 <span className="sr-only">Actions</span>
                             </TableHead>
