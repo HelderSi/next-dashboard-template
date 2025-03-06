@@ -21,7 +21,7 @@ export function Product({ product, selected, onSelectedChange }: {
 }) {
     return (
         <TableRow>
-            <TableCell>
+            <TableCell className="hidden sm:table-cell">
                 <Checkbox
                     checked={selected}
                     onCheckedChange={onSelectedChange}

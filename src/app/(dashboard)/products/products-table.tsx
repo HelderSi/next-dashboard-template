@@ -98,7 +98,7 @@ export function ProductsTable({
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>
+                            <TableHead className="cursor-pointer hidden md:table-cell">
                                 <Checkbox
                                     checked={selected.size === products.length}
                                     onCheckedChange={toggleSelectAll}
@@ -113,11 +113,11 @@ export function ProductsTable({
                             <TableHead onClick={() => handleSort("status")} className="cursor-pointer">
                                 Status <ChevronsUpDown className="w-4 h-4 inline" />
                             </TableHead>
-                            <TableHead onClick={() => handleSort("price")} className="cursor-pointer">
+                            <TableHead onClick={() => handleSort("price")} className="cursor-pointer hidden md:table-cell">
                                 Price <ChevronsUpDown className="w-4 h-4 inline" />
                             </TableHead>
                             <TableHead className="hidden md:table-cell">Total Sales</TableHead>
-                            <TableHead onClick={() => handleSort("availableAt")} className="cursor-pointer">
+                            <TableHead onClick={() => handleSort("availableAt")} className="cursor-pointer hidden md:table-cell">
                                 Created at <ChevronsUpDown className="w-4 h-4 inline" />
                             </TableHead>
                             <TableHead>
