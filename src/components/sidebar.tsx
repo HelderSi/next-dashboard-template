@@ -1,16 +1,17 @@
 import { Button } from "@/components/ui/button";
-import { Home, Power, Settings, User, Users, ChevronLeft, ChevronRight, SidebarOpen, Package2, PanelLeft, SidebarClose } from "lucide-react";
+import { Home, Power, Settings, Users, SidebarOpen, Package2, PanelLeft, SidebarClose, User } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
+import { UserProfile } from "@/app/(dashboard)/user";
 
 const navItems = [
     { name: "Home", icon: Home, path: "/" },
     { name: "Products", icon: Package2, path: "/products" },
     { name: "Users", icon: Users, path: "/users" },
-    { name: "Settings", icon: Settings, path: "/#" },
+    { name: "Settings", icon: Settings, path: "/settings" },
 ];
 
 type SidebarProps = {
@@ -72,23 +73,9 @@ export const DesktopNav = ({ handleSignOut, isCollapsed, onIsCollapsedChange }: 
             </nav>
             {/* User Profile & Logout */}
             <div className="border-t p-4 flex flex-col transition-all duration-300">
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                        <User className="w-5 h-5 text-gray-700 dark:text-gray-300" />
-                    </div>
-                    {!isCollapsed && (<div>
-                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{user?.displayName}</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">{user?.email}</p>
-                    </div>)}
-                </div>
-                <Button
-                    variant="ghost"
-                    className="mt-3 hover:bg-red-300"
-                    onClick={handleSignOut}
-                >
-                    <Power className="w-5 h-5" />  {!isCollapsed && "Logout"}
-                </Button>
+                <UserProfile avatarOny={isCollapsed} />
             </div>
+
         </aside>
     );
 };

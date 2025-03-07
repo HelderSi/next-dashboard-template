@@ -5,7 +5,7 @@ import { useAuthStore } from "@/store/authStore";
 import { DesktopNav, MobileNav } from "@/components/sidebar";
 import Providers from "./providers";
 import clsx from "clsx";
-import { User } from "./user";
+import { UserProfile } from "./user";
 
 export default function DashboardLayout({
   children
@@ -38,7 +38,7 @@ export default function DashboardLayout({
             <MobileNav />
             <h1 className="text-lg font-semibold">Dashboard</h1>
             <div className="ml-auto"> {/* Push User to the right */}
-              <User />
+              <UserProfile />
             </div>
           </header>
 
