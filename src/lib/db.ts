@@ -1,6 +1,6 @@
-import { ProductModel, StatusEnum } from '@/models/Product';
 import 'server-only';
-import { set } from 'zod';
+
+import { ProductModel, StatusEnum } from '@/models/Product';
 
 
 const products: ProductModel[] = [{
@@ -106,9 +106,32 @@ export async function getProducts(
     };
 }
 
-export async function deleteProductById(id: number) {
-    return null;
+export async function deleteProductById(id: string) {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve(null)
+        }, 3000);
+    });
 }
+
+export async function createProduct(data: Pick<ProductModel, "name" | "price">) {
+    console.log("adding product: ", data);
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve(null)
+        }, 3000);
+    });
+}
+
+export async function updateProduct(param: { id: string, data: Pick<ProductModel, "name" | "price"> }) {
+    console.log("updating product: ", param.id, param.data);
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            reject(null)
+        }, 3000);
+    });
+}
+
 
 interface User {
     id: number;

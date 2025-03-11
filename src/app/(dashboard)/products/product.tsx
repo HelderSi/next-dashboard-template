@@ -13,13 +13,18 @@ import { TableCell, TableRow } from '@/components/ui/table';
 import { deleteProduct } from '../actions';
 import { ProductModel } from '@/models/Product';
 import { Checkbox } from '@/components/ui/checkbox';
+import EditProductButton from './edit-product-button';
+import { Modal } from '@/components/modal';
+import ProductForm from './product-form';
+import { useState } from 'react';
 
 export function Product({ product, selected, onSelectedChange }: {
     readonly product: ProductModel,
     readonly selected: boolean,
     readonly onSelectedChange: () => void
 }) {
-    return (
+    const [editing, setEditing] = useState(false);
+    return (<>
         <TableRow>
             <TableCell className="hidden sm:table-cell">
                 <Checkbox
@@ -57,7 +62,7 @@ export function Product({ product, selected, onSelectedChange }: {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem>Edit</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setEditing(true)}>Edit</DropdownMenuItem>
                         <DropdownMenuItem>
                             <form action={deleteProduct}>
                                 <button type="submit">Delete</button>
@@ -67,5 +72,9 @@ export function Product({ product, selected, onSelectedChange }: {
                 </DropdownMenu>
             </TableCell>
         </TableRow>
+        <Modal open={editing} onClose={() => setEditing(false)} title="Edit Product">
+            <ProductForm product={product} onClose={() => setEditing(false)} />
+        </Modal>
+    </>
     );
 }
