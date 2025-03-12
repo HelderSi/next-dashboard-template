@@ -4,16 +4,12 @@ import { createProduct, deleteProductById, updateProduct } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 
 
-export async function deleteProduct(formData: FormData) {
-    const id = formData.get('id')?.toString();
-
-    if (!id) {
+export async function deleteProduct(id: string) {
+    if (!id)
         return;
-    }
 
     await deleteProductById(id);
     revalidatePath('/');
-
     return;
 }
 

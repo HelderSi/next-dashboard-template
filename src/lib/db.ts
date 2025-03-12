@@ -127,7 +127,7 @@ export async function updateProduct(param: { id: string, data: Pick<ProductModel
     console.log("updating product: ", param.id, param.data);
     return new Promise((resolve, reject) => {
         setTimeout(() => {
-            reject(null)
+            resolve(null)
         }, 3000);
     });
 }
